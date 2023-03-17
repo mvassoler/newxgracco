@@ -1,0 +1,32 @@
+server:
+  port: ${SERVICE_PORT:9000}
+  servlet:
+    context-path: /newxgracco
+
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  datasource:
+    url: jdbc:postgresql://localhost:5432/newxgracco
+    username: postgres
+    password: admin
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-timeout: 20000
+      maximum-pool-size: 5
+      pool-name: newxgracco_pool_connections
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        format_sql: true
+
+logging:
+  level:
+    root: info
+    org:
+      hibernate: info
+      springframework:
+        web: debug

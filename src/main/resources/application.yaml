@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: newxgracco-service
+  profiles:
+    active: local
