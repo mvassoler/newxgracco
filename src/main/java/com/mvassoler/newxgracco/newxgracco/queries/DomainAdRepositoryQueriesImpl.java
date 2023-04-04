@@ -1,9 +1,14 @@
 package com.mvassoler.newxgracco.newxgracco.queries;
 
+import com.mvassoler.newxgracco.newxgracco.domain.Domain;
 import com.mvassoler.newxgracco.newxgracco.domain.DomainAd;
+import com.mvassoler.newxgracco.newxgracco.dtos.DomainAdDto;
 import com.mvassoler.newxgracco.newxgracco.filters.DomainAdFilterDTO;
 import com.mvassoler.newxgracco.newxgracco.repositories.DomainAdRepository;
 import com.mvassoler.newxgracco.newxgracco.specs.DomainAdSpec;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -11,11 +16,15 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 @Repository
 public class DomainAdRepositoryQueriesImpl implements RepositoryQueries<DomainAd, DomainAdFilterDTO, DomainAdRepository> {
 
     private final DomainAdRepository domainAdRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public DomainAdRepositoryQueriesImpl(DomainAdRepository domainAdRepository) {
         this.domainAdRepository = domainAdRepository;
@@ -112,5 +121,63 @@ public class DomainAdRepositoryQueriesImpl implements RepositoryQueries<DomainAd
     @Override
     public DomainAdRepository getRepository() {
         return this.domainAdRepository;
+    }
+
+    public List<DomainAd> selectJpqlJoinByIdentificationName(String identificationName) {
+        TypedQuery<DomainAd> typedQuery = entityManager.createQuery(
+                "select da from DomainAd da  join da.domain d where upper(d.identificationName) = :identificationName", DomainAd.class
+        );
+        typedQuery.setParameter("identificationName", identificationName.toUpperCase());
+        return typedQuery.getResultList();
+    }
+
+    public List<DomainAd> selectJpqlLeftJoinByIdentificationName(String identificationName) {
+        TypedQuery<DomainAd> typedQuery = entityManager.createQuery(
+                "select da from DomainAd da left join da.domain d on upper(d.identificationName) = :identificationName", DomainAd.class
+        );
+        typedQuery.setParameter("identificationName", identificationName.toUpperCase());
+        return typedQuery.getResultList();
+    }
+
+    public Domain selectJpqlDomainById(UUID id) {
+        TypedQuery<Domain> typedQuery = entityManager.createQuery(
+                "select d.domain from DomainAd d where d.id = :id", Domain.class
+        );
+        typedQuery.setParameter("id", id);
+        return typedQuery.getSingleResult();
+    }
+
+    public Object[] selectJpqlProjectionUrlAndBaseDnById(UUID id) {
+
+        TypedQuery<Object[]> typedQuery = entityManager.createQuery(
+                "select d.ldapUrl, d.ldapBaseDn from DomainAd d where d.id = :id", Object[].class
+        );
+        typedQuery.setParameter("id", id);
+        Object[] retorno = typedQuery.getSingleResult();
+        return retorno;
+    }
+
+    public List<Object[]> selectJpqlProjectionListUrlAndBaseDnById() {
+        TypedQuery<Object[]> typedQuery = entityManager.createQuery(
+                "select d.ldapUrl, d.ldapBaseDn from DomainAd d", Object[].class
+        );
+        List<Object[]> retorno = typedQuery.getResultList();
+        return retorno;
+    }
+
+    public List<DomainAdDto> selectJpqlProjectionDtoListUrlAndBaseDnById() {
+        TypedQuery<DomainAdDto> typedQuery = entityManager.createQuery(
+                "select new com.mvassoler.newxgracco.newxgracco.dtos.DomainAdDto(ldapUrl, ldapBaseDn) from DomainAd d", DomainAdDto.class
+        );
+        List<DomainAdDto> retorno = typedQuery.getResultList();
+        return retorno;
+    }
+
+    public List<DomainAd> selectJpqlJoinLikeByName(String name) {
+        TypedQuery<DomainAd> typedQuery = entityManager.createQuery(
+                "select da from DomainAd da left join da.domain d where lower(d.name) like concat('%', :name, '%')", DomainAd.class
+        );
+        typedQuery.setParameter("name", name.toLowerCase());
+        return typedQuery.getResultList();
     }
 }

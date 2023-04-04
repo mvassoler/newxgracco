@@ -2,6 +2,7 @@ package com.mvassoler.newxgracco.newxgracco;
 
 import com.mvassoler.newxgracco.newxgracco.domain.Domain;
 import com.mvassoler.newxgracco.newxgracco.domain.DomainAd;
+import com.mvassoler.newxgracco.newxgracco.dtos.DomainAdDto;
 import com.mvassoler.newxgracco.newxgracco.enums.AuthenticationProvider;
 import com.mvassoler.newxgracco.newxgracco.enums.PersonalType;
 import com.mvassoler.newxgracco.newxgracco.filters.DomainAdFilterDTO;
@@ -355,6 +356,68 @@ class DomainAdIT {
         Assertions.assertNotNull(domains);
         Assertions.assertEquals(numberUsers, domains.getContent().size());
     }
+
+    @Test
+    void findDomainForJpql() {
+        this.saveListDomains();
+        UUID id = saveOneDomainAd("45885834000160", "http://localhost:389", "base_dn_ldap_teste1", "teste1@gmail.com", "teste1@Ad123");
+        Domain domain = this.domainAdRepositoryQueries.selectJpqlDomainById(id);
+        Assertions.assertNotNull(domain);
+    }
+
+    @Test
+    void findUrlAndBaseDnForJpql() {
+        this.saveListDomains();
+        UUID id = saveOneDomainAd("45885834000160", "http://localhost:389", "base_dn_ldap_teste1", "teste1@gmail.com", "teste1@Ad123");
+        Object[] retorno = this.domainAdRepositoryQueries.selectJpqlProjectionUrlAndBaseDnById(id);
+        Assertions.assertNotNull(retorno);
+    }
+
+    @Test
+    void findListUrlAndBaseDnForJpql() {
+        saveDomainAds();
+        List<Object[]> retorno = this.domainAdRepositoryQueries.selectJpqlProjectionListUrlAndBaseDnById();
+        int size = 4;
+        Assertions.assertNotNull(retorno);
+        Assertions.assertEquals(size, retorno.size());
+    }
+
+    @Test
+    void findLisInDtoUrlAndBaseDnForJpql() {
+        saveDomainAds();
+        List<DomainAdDto> retorno = this.domainAdRepositoryQueries.selectJpqlProjectionDtoListUrlAndBaseDnById();
+        int size = 4;
+        Assertions.assertNotNull(retorno);
+        Assertions.assertEquals(size, retorno.size());
+    }
+
+    @Test
+    void findListJpqlByIdentificationName() {
+        saveDomainAds();
+        List<DomainAd> domainAds = this.domainAdRepositoryQueries.selectJpqlJoinByIdentificationName("nurcel");
+        int size = 1;
+        Assertions.assertNotNull(domainAds);
+        Assertions.assertEquals(size, domainAds.size());
+    }
+
+    @Test
+    void findListJpqlLeftJoinByIdentificationName() {
+        saveDomainAds();
+        List<DomainAd> domainAds = this.domainAdRepositoryQueries.selectJpqlLeftJoinByIdentificationName("NURCEL");
+        int size = 4;
+        Assertions.assertNotNull(domainAds);
+        Assertions.assertEquals(size, domainAds.size());
+    }
+
+    @Test
+    void findListJpqlLikeJoinByName() {
+        saveDomainAds();
+        List<DomainAd> domainAds = this.domainAdRepositoryQueries.selectJpqlJoinLikeByName("Celulose");
+        int size = 3;
+        Assertions.assertNotNull(domainAds);
+        Assertions.assertEquals(size, domainAds.size());
+    }
+
 
     private UUID saveOneDomainAd(String identificationNumber, String ldapUrl, String ldapBaseDn, String username, String password) {
         Domain domain = this.domainRepositoryQueries.getRepository().findByIdentificationNumber(identificationNumber).orElseThrow();

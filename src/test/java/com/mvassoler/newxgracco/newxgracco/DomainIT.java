@@ -408,6 +408,16 @@ class DomainIT {
         Assertions.assertEquals(numberUsers, domains.getContent().size());
     }
 
+    @Test
+    void TestOneJpql() {
+        UUID id = saveDomain(newDomain(null, "guacel@gmail.com", AuthenticationProvider.DATABASE, Boolean.TRUE, "14998889977",
+                "1432333344", NAME, "GUACEL", "45885834000160", PersonalType.J));
+        //saveListDomainsPersonalTypeJ();
+        //saveListDomainsPersonalTypeF();
+        Domain domain = this.domainRepositoryQueries.selectJpqlByUuid(id);
+        Assertions.assertNotNull(domain);
+    }
+
     private void saveListDomainsPersonalTypeJ() {
         saveDomain(newDomain(null, "guacel@gmail.com", AuthenticationProvider.DATABASE, Boolean.TRUE, "14998889977",
                 "1432333344", NAME, "GUACEL", "45885834000160", PersonalType.J));

@@ -4,6 +4,9 @@ import com.mvassoler.newxgracco.newxgracco.domain.Domain;
 import com.mvassoler.newxgracco.newxgracco.filters.DomainFilterDTO;
 import com.mvassoler.newxgracco.newxgracco.repositories.DomainRepository;
 import com.mvassoler.newxgracco.newxgracco.specs.DomainSpec;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -11,11 +14,15 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 @Repository
 public class DomainRepositoryQueriesImpl implements RepositoryQueries<Domain, DomainFilterDTO, DomainRepository> {
 
     private final DomainRepository domainRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public DomainRepositoryQueriesImpl(DomainRepository domainRepository) {
         this.domainRepository = domainRepository;
@@ -89,5 +96,13 @@ public class DomainRepositoryQueriesImpl implements RepositoryQueries<Domain, Do
     @Override
     public DomainRepository getRepository() {
         return this.domainRepository;
+    }
+
+    public Domain selectJpqlByUuid(UUID id) {
+        TypedQuery<Domain> typedQuery = entityManager.createQuery(
+                "select d from Domain d where d.id = :id", Domain.class
+        );
+        typedQuery.setParameter("id", id);
+        return typedQuery.getSingleResult();
     }
 }
